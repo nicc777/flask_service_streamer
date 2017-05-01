@@ -11,7 +11,7 @@ app = Flask(__name__)
 app.secret_key = 'my secret!'
 memcached_client = Client(["127.0.0.1:11211"], debug=1)
 CHANNEL_KEYS = string.ascii_uppercase
-KEY_PATTERN = re.compile(r"^KEY_(\w)$")
+# KEY_PATTERN = re.compile(r"^KEY_(\w)$")
 
 
 @app.route('/')
@@ -101,17 +101,12 @@ def set_stream():
     data_dict = {}
     session_data = {}
     try:
-        # session['CAN_STREAM'] = False
         data_dict = json.loads(request.data)
         if 'Stream' in data_dict:
             if isinstance(data_dict['Stream'], list):
                 for part in data_dict['Stream']:
                     if part in CHANNEL_KEYS:
-                        # key = 'KEY_{}'.format(part)
-                        # value = memcached_client.get(part)
-                        session_data['KEY_{}'.format(part)] = memcached_client.get(part)
-                        # session[key] = memcached_client.get(part)
-                        # session['CAN_STREAM'] = True
+                        session_data['{}'.format(part)] = memcached_client.get(part)
         if data_dict:
             memcached_client.set(session_id, json.dumps(session_data), time=600)
     except:
