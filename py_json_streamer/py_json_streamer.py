@@ -11,7 +11,6 @@ app = Flask(__name__)
 app.secret_key = 'my secret!'
 memcached_client = Client(["127.0.0.1:11211"], debug=1)
 CHANNEL_KEYS = string.ascii_uppercase
-# KEY_PATTERN = re.compile(r"^KEY_(\w)$")
 
 
 @app.route('/')
@@ -29,7 +28,7 @@ def get_stream():
 
     $ curl -v --cookie-jar ~/tmp/curl.cookies \
       -b ~/tmp/curl.cookies -N                \
-      http://localhost:5000/api/v1.0/stream
+      http://127.0.0.1:5000/api/v1.0/stream
     """
     def generate(session_id):
         """
@@ -47,7 +46,8 @@ def get_stream():
             channels = json.loads(memcached_client.get(session_id))
         except:
             print('EXCEPTION CAUGHT: {}'.format(traceback.format_exc()))
-            return json.dumps({'Error': 'Channels could not be loaded. Use set_stream first'})
+            return Response(json.dumps({'Error': 'Channels could not be loaded. Use set_stream first'}), mimetype='application/json')
+            # return json.dumps({'Error': 'Channels could not be loaded. Use set_stream first'})
         for key in channels:
             yield json.dumps(channels)
         time.sleep(1)
@@ -65,14 +65,14 @@ def get_stream():
                         updated_channels[key] = cached_value
             if updated_channels:
                 memcached_client.set(session_id, json.dumps(channels), time=600)
-            #     yield json.dumps(updated_channels)
             if counter > 9:
                 counter = 0
                 yield json.dumps({None})
             time.sleep(1)
     session_id = request.cookies.get('SUBID')
     if not session_id:
-        return json.dumps({'Error': 'No session found. Use set_stream first'})
+        # return json.dumps({'Error': 'No session found. Use set_stream first'})
+        return Response(json.dumps({'Error': 'No session found. Use set_stream first'}), mimetype='application/json')
     return Response(generate(session_id), mimetype='application/json')
 
 
@@ -80,10 +80,11 @@ def get_stream():
 def set_stream():
     '''
     Example (subscribe to value updates for streams A and B):
-    $ curl -i --cookie-jar ~/tmp/curl.cookies     \
-      -H "Content-Type: application/json"         \
-      -X POST -d '{"Stream": ["A", "B"]}'         \
-      http://localhost:5000/api/v1.0/set_stream
+    $ curl -v --cookie-jar ~/tmp/curl.cookies \
+      -b ~/tmp/curl.cookies                   \
+      -H "Content-Type: application/json"     \
+      -X POST -d '{"Stream": ["A","M","Z"]}'  \
+      http://127.0.0.1:5000/api/v1.0/set_stream
 
     We need the cookie jar for the get requests later...
     '''
