@@ -60,7 +60,9 @@ def get_stream():
                 yield json.dumps({'Updates': None})
             time.sleep(1)
     session_id = request.cookies.get('SUBID')
-    session_data = json.loads(memcached_client.get(session_id))
+    session_data = {}
+    if session_id:
+        session_data = json.loads(memcached_client.get(session_id))
     channels = {}
     for key in session_data:
         search_test = re.search(KEY_PATTERN, key)
