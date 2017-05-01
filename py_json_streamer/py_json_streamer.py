@@ -59,14 +59,14 @@ def get_stream():
                 counter = 0
                 yield json.dumps({'Updates': None})
             time.sleep(1)
+    session_id = request.cookies.get('SUBID')
+    session_data = json.loads(memcached_client.get(session_id))
     channels = {}
-    if 'CAN_STREAM' in session:
-        if session['CAN_STREAM']:
-            for key in session:
-                search_test = re.search(KEY_PATTERN, key)
-                if search_test:
-                    if search_test.group(1) in CHANNEL_KEYS:
-                        channels[search_test.group(1)] = session[key]
+    for key in session_data:
+        search_test = re.search(KEY_PATTERN, key)
+        if search_test:
+            if search_test.group(1) in CHANNEL_KEYS:
+                channels[search_test.group(1)] = session_data[key]
     if not channels:
         return json.dumps({'Error': 'Use set_stream first'})
     #return Response(generate(channels), mimetype='application/json')
