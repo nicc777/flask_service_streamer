@@ -48,13 +48,17 @@ def get_stream():
         while True:
             counter += 1
             channels = json.loads(memcached_client.get(session_id))
+            updated_channels = {}
             if channels:
                 for key in channels:
                     cached_value = memcached_client.get(key)
                     if cached_value != channels[key]:
                         channels[key] = cached_value
                         counter = 0
-                        yield json.dumps({'ChannelValueUpdate': {'{}'.format(key): cached_value}})
+                        updated_channels[key] = cached_value
+            if updated_channels:
+                memcached_client.set(session_id, json.dumps(channels), time=600)
+                yield json.dumps(updated_channels)
             if counter > 9:
                 counter = 0
                 yield json.dumps({'Updates': None})
