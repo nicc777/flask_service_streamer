@@ -61,13 +61,14 @@ def get_stream():
                     if cached_value != channels[key]:
                         channels[key] = cached_value
                         counter = 0
+                        yield json.dumps({key: cached_value})
                         updated_channels[key] = cached_value
             if updated_channels:
                 memcached_client.set(session_id, json.dumps(channels), time=600)
-                yield json.dumps(updated_channels)
+            #     yield json.dumps(updated_channels)
             if counter > 9:
                 counter = 0
-                yield json.dumps({'Updates': None})
+                yield json.dumps({None})
             time.sleep(1)
     session_id = request.cookies.get('SUBID')
     if not session_id:
