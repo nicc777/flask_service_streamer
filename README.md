@@ -7,12 +7,15 @@ This is a sample application to demonstrate an implementation using [flask](http
 Python:
 
 * Flask
-* python-memcached
+* [python3-memcached](https://pypi.python.org/pypi/python3-memcached/1.51)
+
 
 Other:
 
 * [Memcached](https://memcached.org) - Used to store values to channels we will subscribe to as well as the per session channel subscription information.
 * [Oboe.js](http://oboejs.com) - Used to demonstrate the streaming features in a web browser
+
+To inspect memcached, refer to [this useful page](https://www.darkcoding.net/software/memcached-list-all-keys/)
 
 # Status
 
@@ -41,7 +44,7 @@ Assuming you are cloning to the `git` directory in your home directory, run the 
 Commands:
 
 	$ . venv/bin/activate
-	(venv)$ pip3 install Flask python-memcached
+	(venv)$ pip3 install Flask python3-memcached
 
 ## Start Memcached in a Separate Terminal
 
@@ -54,4 +57,12 @@ Command:
 Run the following command and press CTRL+C after a couple of seconds (you do not have to, but for the purpose of demonstrating the capabilities it is recommended):
 
 	$ python3 py_json_streamer/random_value_updater.py
+
+## Start the Flask App
+
+Commands:
+
+	$ export FLASK_APP=py_json_streamer/py_json_streamer.py
+	$ flask run
+
 

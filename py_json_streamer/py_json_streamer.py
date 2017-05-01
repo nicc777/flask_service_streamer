@@ -2,7 +2,7 @@
 Flask service to demonstrate how a web browser can subscribe to streaming
 channel updates.
 """
-import time, json, traceback, string, re
+import time, json, traceback, string, re, uuid
 from flask import Flask, jsonify, Response, request, make_response, session
 from memcache import Client
 
@@ -31,21 +31,23 @@ def get_stream():
       -b ~/tmp/curl.cookies -N                \
       http://localhost:5000/api/v1.0/stream
     """
-    def generate(channels):
+    def generate(session_id):
         """
         Streaming helper function as per http://flask.pocoo.org/docs/0.12/patterns/streaming/
 
         Args:
-            channels (dict): Subscribed channels with their initial values
+            session_id (string): The session ID to retrieve from memcached
 
         Returns:
             json: Yields (streams) the updated values, or returns an error (stream breaks!)
         """
         counter = 0
+        channels = json.loads(memcached_client.get(session_id))
         for key in channels:
             yield json.dumps({'ChannelValueUpdate': {'{}'.format(key): channels[key]}})
         while True:
             counter += 1
+            channels = json.loads(memcached_client.get(session_id))
             if channels:
                 for key in channels:
                     cached_value = memcached_client.get(key)
@@ -67,7 +69,8 @@ def get_stream():
                         channels[search_test.group(1)] = session[key]
     if not channels:
         return json.dumps({'Error': 'Use set_stream first'})
-    return Response(generate(channels), mimetype='application/json')
+    #return Response(generate(channels), mimetype='application/json')
+    return Response(generate(session_id), mimetype='application/json')
 
 
 @app.route('/api/v1.0/set_stream', methods=['POST'])
@@ -81,20 +84,30 @@ def set_stream():
 
     We need the cookie jar for the get requests later...
     '''
+    session_id = request.cookies.get('SUBID')
+    response = make_response('ok')
+    if not session_id:
+        session_id = uuid.uuid4().hex
+        response.set_cookie('SUBID', value=session_id)
     data_dict = {}
+    session_data = {}
     try:
-        session['CAN_STREAM'] = False
+        # session['CAN_STREAM'] = False
         data_dict = json.loads(request.data)
         if 'Stream' in data_dict:
             if isinstance(data_dict['Stream'], list):
-                for p in data_dict['Stream']:
-                    if p in CHANNEL_KEYS:
-                        key = 'KEY_{}'.format(p)
-                        session[key] = memcached_client.get(p)
-                        session['CAN_STREAM'] = True
+                for part in data_dict['Stream']:
+                    if part in CHANNEL_KEYS:
+                        # key = 'KEY_{}'.format(part)
+                        # value = memcached_client.get(part)
+                        session_data['KEY_{}'.format(part)] = memcached_client.get(part)
+                        # session[key] = memcached_client.get(part)
+                        # session['CAN_STREAM'] = True
+        if data_dict:
+            memcached_client.set(uuid.uuid4().hex, json.dumps(session_data), time=600)
     except:
         print('Failed to load data: {}'.format(traceback.format_exc()))
-        return 'error'
-    return 'ok'
+        response = make_response('error')
+    return response
 
 # EOF
