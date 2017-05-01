@@ -44,7 +44,8 @@ def get_stream():
         counter = 0
         channels = json.loads(memcached_client.get(session_id))
         for key in channels:
-            yield json.dumps({'ChannelValueUpdate': {'{}'.format(key): channels[key]}})
+            yield json.dumps(channels)
+        time.sleep(1)
         while True:
             counter += 1
             channels = json.loads(memcached_client.get(session_id))
@@ -64,19 +65,12 @@ def get_stream():
                 yield json.dumps({'Updates': None})
             time.sleep(1)
     session_id = request.cookies.get('SUBID')
-    session_data = {}
     if session_id:
         try:
             session_data = json.loads(memcached_client.get(session_id))
         except:
             print('EXCEPTION CAUGHT: {}'.format(traceback.format_exc()))
             return json.dumps({'Error': 'Use set_stream first'})
-    # channels = {}
-    # for key in session_data:
-    #     if key in CHANNEL_KEYS:
-    #         channels[key] = session_data[key]
-    # if not channels:
-    #     return json.dumps({'Error': 'Use set_stream first'})
     return Response(generate(session_id), mimetype='application/json')
 
 
