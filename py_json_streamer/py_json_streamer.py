@@ -62,7 +62,10 @@ def get_stream():
     session_id = request.cookies.get('SUBID')
     session_data = {}
     if session_id:
-        session_data = json.loads(memcached_client.get(session_id))
+        try:
+            session_data = json.loads(memcached_client.get(session_id))
+        except:
+            print('EXCEPTION CAUGHT: {}'.format(traceback.format_exc()))
     channels = {}
     for key in session_data:
         search_test = re.search(KEY_PATTERN, key)
