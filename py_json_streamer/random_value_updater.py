@@ -20,7 +20,7 @@ if __name__ == '__main__':
             if r < 10 or r > 90:
                 print('Setting value for {}'.format(c), end='')
                 v = random.randint(0, 100)
-                mc.set(c, v, noreply=False)
+                mc.set(c, v, time=600)
                 print('  -> test: v={}'.format(mc.get(c)))
         print('*')
         time.sleep(1)
