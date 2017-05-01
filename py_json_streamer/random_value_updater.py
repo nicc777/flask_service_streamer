@@ -13,14 +13,14 @@ mc = Client(servers, debug=1)
 
 if __name__ == '__main__':
     for c in string.ascii_uppercase:
-        mc.set(c, 0, noreply=False)
+        mc.set(c, 0, time=0)
     while True:
         for c in string.ascii_uppercase:
             r = random.randint(0, 100)
             if r < 10 or r > 90:
                 print('Setting value for {}'.format(c), end='')
                 v = random.randint(0, 100)
-                mc.set(c, v, time=600)
+                mc.set(c, v, time=0)
                 print('  -> test: v={}'.format(mc.get(c)))
         print('*')
         time.sleep(1)
