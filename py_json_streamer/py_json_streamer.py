@@ -47,7 +47,6 @@ def get_stream():
         except:
             print('EXCEPTION CAUGHT: {}'.format(traceback.format_exc()))
             return Response(json.dumps({'Error': 'Channels could not be loaded. Use set_stream first'}), mimetype='application/json')
-            # return json.dumps({'Error': 'Channels could not be loaded. Use set_stream first'})
         for key in channels:
             yield json.dumps(channels)
         time.sleep(1)
@@ -67,11 +66,10 @@ def get_stream():
                 memcached_client.set(session_id, json.dumps(channels), time=600)
             if counter > 9:
                 counter = 0
-                yield json.dumps({None})
+                yield json.dumps({"Updates": False})
             time.sleep(1)
     session_id = request.cookies.get('SUBID')
     if not session_id:
-        # return json.dumps({'Error': 'No session found. Use set_stream first'})
         return Response(json.dumps({'Error': 'No session found. Use set_stream first'}), mimetype='application/json')
     return Response(generate(session_id), mimetype='application/json')
 
