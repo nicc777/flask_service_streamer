@@ -109,7 +109,7 @@ def set_stream():
                         # session[key] = memcached_client.get(part)
                         # session['CAN_STREAM'] = True
         if data_dict:
-            memcached_client.set(uuid.uuid4().hex, json.dumps(session_data), time=600)
+            memcached_client.set(session_id, json.dumps(session_data), time=600)
     except:
         print('Failed to load data: {}'.format(traceback.format_exc()))
         response = make_response('error')
