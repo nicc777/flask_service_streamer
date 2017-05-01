@@ -47,8 +47,7 @@ def get_stream():
         except:
             print('EXCEPTION CAUGHT: {}'.format(traceback.format_exc()))
             return Response(json.dumps({'Error': 'Channels could not be loaded. Use set_stream first'}), mimetype='application/json')
-        for key in channels:
-            yield json.dumps(channels)
+        yield json.dumps(channels)
         time.sleep(1)
         while True:
             counter += 1
