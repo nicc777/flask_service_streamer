@@ -70,15 +70,13 @@ def get_stream():
             session_data = json.loads(memcached_client.get(session_id))
         except:
             print('EXCEPTION CAUGHT: {}'.format(traceback.format_exc()))
-    channels = {}
-    for key in session_data:
-        search_test = re.search(KEY_PATTERN, key)
-        if search_test:
-            if search_test.group(1) in CHANNEL_KEYS:
-                channels[search_test.group(1)] = session_data[key]
-    if not channels:
-        return json.dumps({'Error': 'Use set_stream first'})
-    #return Response(generate(channels), mimetype='application/json')
+            return json.dumps({'Error': 'Use set_stream first'})
+    # channels = {}
+    # for key in session_data:
+    #     if key in CHANNEL_KEYS:
+    #         channels[key] = session_data[key]
+    # if not channels:
+    #     return json.dumps({'Error': 'Use set_stream first'})
     return Response(generate(session_id), mimetype='application/json')
 
 
